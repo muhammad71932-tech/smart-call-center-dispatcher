@@ -1,0 +1,126 @@
+================================================================
+  Smart Call Center Dispatcher — Windows Setup Guide
+================================================================
+
+WHAT YOU NEED:
+  - Windows 10 or 11
+  - About 10 minutes for one-time setup
+  - Internet connection (for downloading tools)
+
+================================================================
+  OPTION A — MSYS2 (Recommended, easiest)
+================================================================
+
+STEP 1: Download & Install MSYS2
+  1. Go to: https://www.msys2.org
+  2. Download the installer (msys2-x86_64-*.exe)
+  3. Run it, install to default location: C:\msys64
+  4. At the end, let it open the MSYS2 terminal
+
+STEP 2: Install GCC, Make, and SQLite inside MSYS2
+  In the MSYS2 MINGW64 terminal, run these commands one by one:
+
+    pacman -Syu
+    pacman -S mingw-w64-x86_64-gcc
+    pacman -S mingw-w64-x86_64-make
+    pacman -S mingw-w64-x86_64-sqlite3
+
+  (Press Y and Enter when asked to confirm)
+
+STEP 3: Copy this project to your Windows machine
+  - Copy the entire "smart-call-center-dispatcher" folder
+    from the USB to somewhere easy, e.g.:
+    C:\Users\YourName\Desktop\smart-call-center-dispatcher
+
+STEP 4: Build and Run
+  1. Open "MSYS2 MINGW64" from the Start Menu
+  2. Navigate to the project:
+
+    cd /c/Users/YourName/Desktop/smart-call-center-dispatcher/backend
+
+     (replace YourName with your actual Windows username)
+
+  3. Build:
+
+    mingw32-make
+
+  4. Run:
+
+    ./dispatcher.exe
+
+  5. Open your browser and go to:
+
+    http://localhost:9090
+
+================================================================
+  OPTION B — WSL (Windows Subsystem for Linux)
+================================================================
+
+  If you already have WSL installed (Ubuntu on Windows):
+
+  STEP 1: Open Ubuntu (WSL) terminal
+
+  STEP 2: Install dependencies
+    sudo apt update
+    sudo apt install gcc make libsqlite3-dev
+
+  STEP 3: Copy project to WSL
+    cp -r /mnt/c/Users/YourName/Desktop/smart-call-center-dispatcher ~/
+
+  STEP 4: Build and run
+    cd ~/smart-call-center-dispatcher
+    chmod +x start.sh
+    ./start.sh
+
+  STEP 5: Open browser at http://localhost:9090
+
+================================================================
+  NOTES
+================================================================
+
+  - The database file is at: backend\data\callcenter.db
+    All your agents, calls, and history are saved here.
+    Back it up by just copying that file.
+
+  - To stop the server: press Ctrl+C in the terminal
+
+  - To run again next time:
+      MSYS2:  cd to backend folder → ./dispatcher.exe
+      WSL:    ./start.sh
+
+  - Default port is 9090. If something else is using it,
+    edit backend/main.c line 7:
+      #define PORT "9090"
+    Change 9090 to any free port (e.g. 8888), then rebuild.
+
+================================================================
+  TROUBLESHOOTING
+================================================================
+
+  Problem: "mingw32-make not found"
+  Fix: Use "make" instead of "mingw32-make"
+       Or add C:\msys64\mingw64\bin to your Windows PATH
+
+  Problem: Port already in use
+  Fix: Open Task Manager → find process using port 9090
+       Or change the port (see NOTES above)
+
+  Problem: Browser shows "This site can't be reached"
+  Fix: Make sure the terminal is still running (server must stay open)
+       Make sure you typed http:// not https://
+
+  Problem: SQLite not found during build
+  Fix: Run in MSYS2:
+       pacman -S mingw-w64-x86_64-sqlite3
+
+================================================================
+  QUICK REFERENCE
+================================================================
+
+  Build:   mingw32-make          (in backend/ folder)
+  Run:     ./dispatcher.exe      (in backend/ folder)
+  Open:    http://localhost:9090 (in browser)
+  Stop:    Ctrl+C                (in terminal)
+  Data:    backend/data/callcenter.db
+
+================================================================
