@@ -1,0 +1,16 @@
+# Compiled binary
+backend/dispatcher
+
+# SQLite database (runtime data)
+backend/data/*.db
+backend/data/*.db-wal
+backend/data/*.db-shm
+
+# Object files
+*.o
+
+# Editor/OS files
+.DS_Store
+*.swp
+*~
+.vscode/

@@ -1,0 +1,277 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Smart Call Center Dispatcher</title>
+  <link rel="stylesheet" href="css/style.css" />
+</head>
+<body>
+  <!-- SIDEBAR -->
+  <nav class="sidebar">
+    <div class="sidebar-logo">
+      <div class="logo-icon">📞</div>
+      <div>
+        <div class="logo-title">CallCenter</div>
+        <div class="logo-sub">Dispatcher Pro</div>
+      </div>
+    </div>
+    <ul class="nav-menu">
+      <li class="nav-item active" data-page="dashboard">
+        <span class="nav-icon">◈</span> Dashboard
+      </li>
+      <li class="nav-item" data-page="agents">
+        <span class="nav-icon">👤</span> Agents
+      </li>
+      <li class="nav-item" data-page="calls">
+        <span class="nav-icon">📋</span> Call History
+      </li>
+      <li class="nav-item" data-page="queue">
+        <span class="nav-icon">⏳</span> Live Queue
+      </li>
+      <li class="nav-item" data-page="dispatch">
+        <span class="nav-icon">⚡</span> Dispatch
+      </li>
+      <li class="nav-item" data-page="reports">
+        <span class="nav-icon">📊</span> Reports
+      </li>
+    </ul>
+    <div class="sidebar-footer">
+      <div class="server-status">
+        <span class="status-dot online"></span>
+        <span id="server-status-text">Connected</span>
+      </div>
+    </div>
+  </nav>
+
+  <!-- MAIN CONTENT -->
+  <main class="main-content">
+    <header class="topbar">
+      <div class="topbar-title" id="page-title">Dashboard</div>
+      <div class="topbar-actions">
+        <button class="btn btn-outline" onclick="refreshAll()">↺ Refresh</button>
+        <div class="clock" id="clock"></div>
+      </div>
+    </header>
+
+    <!-- DASHBOARD PAGE -->
+    <div class="page active" id="page-dashboard">
+      <div class="stat-cards">
+        <div class="stat-card blue">
+          <div class="stat-label">Total Calls Today</div>
+          <div class="stat-value" id="stat-total">—</div>
+        </div>
+        <div class="stat-card orange">
+          <div class="stat-label">In Queue</div>
+          <div class="stat-value" id="stat-waiting">—</div>
+        </div>
+        <div class="stat-card green">
+          <div class="stat-label">Active Calls</div>
+          <div class="stat-value" id="stat-active">—</div>
+        </div>
+        <div class="stat-card teal">
+          <div class="stat-label">Completed</div>
+          <div class="stat-value" id="stat-completed">—</div>
+        </div>
+        <div class="stat-card red">
+          <div class="stat-label">Abandoned</div>
+          <div class="stat-value" id="stat-abandoned">—</div>
+        </div>
+      </div>
+
+      <div class="row-2col">
+        <div class="card">
+          <div class="card-header">Agent Status Overview</div>
+          <div class="agent-status-grid" id="agent-status-grid"></div>
+        </div>
+        <div class="card">
+          <div class="card-header">Performance Metrics</div>
+          <div class="metrics-list" id="metrics-list"></div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-header">
+          Live Queue
+          <button class="btn btn-sm btn-primary" onclick="autoDispatch()">⚡ Auto Dispatch All</button>
+        </div>
+        <div id="dash-queue-table"></div>
+      </div>
+    </div>
+
+    <!-- AGENTS PAGE -->
+    <div class="page" id="page-agents">
+      <div class="card">
+        <div class="card-header">
+          Agents
+          <button class="btn btn-sm btn-primary" onclick="openAgentModal()">+ Add Agent</button>
+        </div>
+        <div id="agents-table"></div>
+      </div>
+    </div>
+
+    <!-- CALL HISTORY PAGE -->
+    <div class="page" id="page-calls">
+      <div class="card">
+        <div class="card-header">
+          Call History
+          <button class="btn btn-sm btn-primary" onclick="openCallModal()">+ New Call</button>
+        </div>
+        <div class="filter-bar">
+          <input type="text" id="call-search" placeholder="Search caller..." oninput="filterCalls()" />
+          <select id="call-filter-status" onchange="filterCalls()">
+            <option value="">All Status</option>
+            <option>WAITING</option>
+            <option>ACTIVE</option>
+            <option>COMPLETED</option>
+            <option>ABANDONED</option>
+          </select>
+          <select id="call-filter-priority" onchange="filterCalls()">
+            <option value="">All Priority</option>
+            <option>EMERGENCY</option>
+            <option>VIP</option>
+            <option>NORMAL</option>
+          </select>
+        </div>
+        <div id="calls-table"></div>
+      </div>
+    </div>
+
+    <!-- QUEUE PAGE -->
+    <div class="page" id="page-queue">
+      <div class="card">
+        <div class="card-header">
+          Live Call Queue
+          <button class="btn btn-sm btn-success" onclick="autoDispatch()">⚡ Auto Dispatch All</button>
+        </div>
+        <div id="queue-table"></div>
+      </div>
+    </div>
+
+    <!-- DISPATCH PAGE -->
+    <div class="page" id="page-dispatch">
+      <div class="card">
+        <div class="card-header">Manual Dispatch</div>
+        <div class="dispatch-form">
+          <div class="form-row">
+            <div class="form-group">
+              <label>Select Call (Waiting)</label>
+              <select id="dispatch-call-id"><option value="">-- select call --</option></select>
+            </div>
+            <div class="form-group">
+              <label>Select Agent (Available)</label>
+              <select id="dispatch-agent-id"><option value="">-- auto select --</option></select>
+            </div>
+          </div>
+          <button class="btn btn-primary" onclick="manualDispatch()">Dispatch Call</button>
+          <div id="dispatch-result" class="dispatch-result"></div>
+        </div>
+      </div>
+      <div class="row-2col">
+        <div class="card">
+          <div class="card-header">Waiting Calls</div>
+          <div id="dispatch-queue-list"></div>
+        </div>
+        <div class="card">
+          <div class="card-header">Available Agents</div>
+          <div id="dispatch-agents-list"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- REPORTS PAGE -->
+    <div class="page" id="page-reports">
+      <div class="row-2col">
+        <div class="card">
+          <div class="card-header">Daily Call Statistics</div>
+          <div id="daily-report-table"></div>
+        </div>
+        <div class="card">
+          <div class="card-header">Agent Performance</div>
+          <div id="agent-report-table"></div>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <!-- MODALS -->
+  <div class="modal-overlay" id="modal-overlay" onclick="closeModal()"></div>
+
+  <!-- Agent Modal -->
+  <div class="modal" id="agent-modal">
+    <div class="modal-header">
+      <span id="agent-modal-title">Add Agent</span>
+      <button class="modal-close" onclick="closeModal()">✕</button>
+    </div>
+    <div class="modal-body">
+      <input type="hidden" id="agent-id" />
+      <div class="form-group">
+        <label>Full Name *</label>
+        <input type="text" id="agent-name" placeholder="e.g. John Smith" />
+      </div>
+      <div class="form-group">
+        <label>Phone</label>
+        <input type="text" id="agent-phone" placeholder="+1 555 0100" />
+      </div>
+      <div class="form-group">
+        <label>Email</label>
+        <input type="email" id="agent-email" placeholder="agent@company.com" />
+      </div>
+      <div class="form-group">
+        <label>Skills (comma separated)</label>
+        <input type="text" id="agent-skills" placeholder="billing,tech,sales" />
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-outline" onclick="closeModal()">Cancel</button>
+      <button class="btn btn-primary" onclick="saveAgent()">Save Agent</button>
+    </div>
+  </div>
+
+  <!-- Call Modal -->
+  <div class="modal" id="call-modal">
+    <div class="modal-header">
+      <span>New Incoming Call</span>
+      <button class="modal-close" onclick="closeModal()">✕</button>
+    </div>
+    <div class="modal-body">
+      <div class="form-group">
+        <label>Caller Phone / ID *</label>
+        <input type="text" id="call-caller-id" placeholder="+1 555 9876" />
+      </div>
+      <div class="form-group">
+        <label>Caller Name</label>
+        <input type="text" id="call-caller-name" placeholder="Customer name" />
+      </div>
+      <div class="form-group">
+        <label>Priority</label>
+        <select id="call-priority">
+          <option value="NORMAL">Normal</option>
+          <option value="VIP">VIP</option>
+          <option value="EMERGENCY">Emergency</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label>Category</label>
+        <select id="call-category">
+          <option value="general">General</option>
+          <option value="billing">Billing</option>
+          <option value="tech">Technical Support</option>
+          <option value="sales">Sales</option>
+          <option value="complaints">Complaints</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label>Notes</label>
+        <textarea id="call-notes" rows="2" placeholder="Optional notes..."></textarea>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-outline" onclick="closeModal()">Cancel</button>
+      <button class="btn btn-primary" onclick="saveCall()">Add to Queue</button>
+    </div>
+  </div>
+
+  <script src="js/app.js"></script>
+</body>
+</html>
